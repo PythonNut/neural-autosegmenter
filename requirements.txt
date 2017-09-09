@@ -1,1 +1,4 @@
 tensorflow
+keras
+h5py
+matplotlib
