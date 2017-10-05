@@ -223,11 +223,14 @@ class PlotLoss(keras.callbacks.Callback):
         self.i += 1
 
         self.axes[0].cla()
+        self.axes[0].set_yscale('log', nonposy='clip')
+        self.axes[0].grid(True)
         self.axes[0].plot(self.x, self.losses, '-o', label="loss")
         self.axes[0].plot(self.x, self.val_losses, '-o', label="val_loss")
         self.axes[0].legend()
 
         self.axes[1].cla()
+        self.axes[1].grid(True)
         self.axes[1].plot(self.x, self.acc, '-o', label="acc")
         self.axes[1].plot(self.x, self.val_acc, '-o', label="val_acc")
         self.axes[1].legend()
