@@ -87,7 +87,9 @@ def get_texts():
         # if random.random() > 0.1: continue
         print('Loading {}'.format(d).ljust(terminal_width), end='\r')
         with open('corpus/' + d) as f:
-            texts.append(re.sub(r'\s+', ' ', unidecode(f.read())).strip())
+            try:
+                texts.append(re.sub(r'\s+', ' ', unidecode(f.read())).strip())
+            except UnicodeDecodeError: pass
 
     print('Collecting characters'.ljust(terminal_width))
     raw_chars = reduce(operator.__or__, map(set,texts))
