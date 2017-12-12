@@ -17,7 +17,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.layers import LSTM
 from keras.layers import Flatten
-from keras.optimizers import RMSprop
+from keras.optimizers import RMSprop, Adam, Nadam
 from keras.regularizers import L1L2
 from keras.utils.data_utils import get_file
 from keras.callbacks import ModelCheckpoint
@@ -130,12 +130,12 @@ def generate_training_data(text, char_index_map, chunklen):
 
 def build_model(chunklen, char_map):
     model = Sequential()
-    # model.add(LSTM(128, return_sequences=True, input_shape=(chunklen, len(char_map))))
-    model.add(LSTM(128, input_shape=(chunklen, len(char_map))))
-    # model.add(LSTM(128))
+    model.add(LSTM(128, return_sequences=True, input_shape=(chunklen, len(char_map))))
+    #model.add(LSTM(128, input_shape=(chunklen, len(char_map))))
+    model.add(LSTM(128))
     model.add(Dense(chunklen, activation='sigmoid'))
 
-    optimizer = RMSprop(lr=0.01)
+    optimizer = Nadam(lr=0.001)
     model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
     return model
 
@@ -145,7 +145,7 @@ def train(model, G, callbacks, chunklen):
         validation_data=G,
         steps_per_epoch=10000,
         epochs=100000,
-        validation_steps=100,
+        validation_steps=1000,
         callbacks=callbacks
     )
 
@@ -225,14 +225,14 @@ class PlotLoss(keras.callbacks.Callback):
         self.axes[0].cla()
         self.axes[0].set_yscale('log', nonposy='clip')
         self.axes[0].grid(True)
-        self.axes[0].plot(self.x, self.losses, '-o', label="loss")
-        self.axes[0].plot(self.x, self.val_losses, '-o', label="val_loss")
+        self.axes[0].plot(self.x, self.losses, '-o', ms=2, label="loss")
+        self.axes[0].plot(self.x, self.val_losses, '-o', ms=2, label="val_loss")
         self.axes[0].legend()
 
         self.axes[1].cla()
         self.axes[1].grid(True)
-        self.axes[1].plot(self.x, self.acc, '-o', label="acc")
-        self.axes[1].plot(self.x, self.val_acc, '-o', label="val_acc")
+        self.axes[1].plot(self.x, self.acc, '-o', ms=2, label="acc")
+        self.axes[1].plot(self.x, self.val_acc, '-o', ms=2, label="val_acc")
         self.axes[1].legend()
 
         self.fig.canvas.draw()
@@ -244,7 +244,7 @@ def main():
     model = build_model(chunklen, char_index_map)
     G = generate_training_data(text, char_index_map, chunklen)
 
-    checkpointer = ModelCheckpoint(filepath='model.{epoch:03d}-{val_loss:.4f}.hdf5', save_best_only=False)
+    checkpointer = ModelCheckpoint(filepath='model.{epoch:03d}-{val_loss:.4f}.hdf5', save_best_only=True)
     modelplotter = PlotModel(G, index_char_map, chunklen)
     lossplotter = PlotLoss()
 
